@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>G10 Mind Map — ALCOHOLS, PHENOLS & ETHERS</title>
+<style>
+:root {
+  --bg:#e2e8f0;
+  --accent1:#0ea5e9;
+  --accent2:#f97316;
+  --accent3:#34d399;
+  --accent4:#f472b6;
+  --muted:#334155;
+  --card:#ffffff;
+}
+html,body {height:100%;margin:0;background:var(--bg);font-family:Inter,system-ui,'Segoe UI',Roboto;overflow:hidden;}
+.app {display:flex;flex-direction:column;height:100vh;padding:12px;box-sizing:border-box;gap:12px;}
+h1 {text-align:center;color:#0f172a;margin:0;font-size:1.5em;font-weight:600;}
+.canvas-wrap {flex:1;position:relative;border-radius:12px;background:var(--card);box-shadow:0 6px 18px rgba(15,23,42,0.15);overflow:hidden;}
+#mindmap-svg {width:100%;height:100%;cursor:grab;touch-action:none;background:#f8fafc;}
+.toolbar {
+  position:absolute;
+  right:12px;
+  top:12px;
+  display:flex;
+  gap:8px;
+  z-index:20;
+}
+.toolbar button {
+  background:var(--accent1);
+  color:#fff;
+  font-weight:500;
+  padding:6px 12px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  box-shadow:0 2px 5px rgba(0,0,0,0.2);
+  transition:all 0.2s;
+}
+.toolbar button:hover {
+  background:var(--accent2);
+  transform:scale(1.05);
+}
+text {
+  font-size:14px;
+  fill:#0f172a;
+  cursor:pointer;
+  font-weight:500;
+}
+rect.label-box {fill:#ffffff;stroke:#1e293b;stroke-width:1.3;rx:6;ry:6;}
+.modal {
+  display:none;
+  position:fixed;
+  z-index:50;
+  left:0;top:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.4);
+}
+.modal-content {
+  background:#fff;
+  margin:10% auto;
+  padding:20px;
+  border-radius:10px;
+  width:80%;max-width:500px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.25);
+  position:relative;
+  overflow:auto;
+  max-height:80vh;
+}
+.modal-content p {font-size:0.95em; line-height:1.3em;}
+.modal-content p, 
+.modal-content div {
+  font-size: 0.95em;
+  line-height: 1.5em; /* increase space between lines */
+}
+
+.modal-content .MathJax { font-size: 1.05em !important; }
+.close {
+  position:absolute;
+  right:12px;top:8px;
+  font-size:22px;
+  cursor:pointer;
+  color:#555;
+}
+.close:hover {color:#000;}
+.modal h2 {margin-top:0;color:var(--accent1);}
+</style>
+</head>
+<body>
+
+<div class="app">
+ <h1>
+  <img src="https://i.ibb.co/WNZTWPwv/LOGO-PNG-2025-fab.png" alt="Logo" style="height:36px; vertical-align:middle; margin-right:8px;">
+  G10-Educational Platform Mind Map — ALCOHOLS, PHENOLS & ETHERS
+</h1>
+  <div class="canvas-wrap" id="canvasWrap">
+    <div class="toolbar">
+      <button id="expandAll">Expand</button>
+      <button id="collapseAll">Collapse</button>
+      <button id="centerBtn">Center</button>
+      <button id="resetZoom">Reset</button>
+    </div>
+    <svg id="mindmap-svg"></svg>
+  </div>
+</div>
+
+<div id="infoModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <p id="modalDesc"></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+window.MathJax = {
+  tex: { packages: {'[+]':['mhchem']}, inlineMath: [['\\(','\\)'], ['$', '$']], displayMath: [['$$','$$'], ['\\[','\\]']], processEscapes: true },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<script>
+// ==============================
+// NCERT CLASS 12 - ALCOHOLS, PHENOLS & ETHERS
+// ==============================
+const DESCRIPTIONS = {
+  "Alcohols, Phenols & Ethers": "Organic compounds containing hydroxyl (-OH) functional group or ether (-O-) linkage.",
+
+  "Alcohols": {
+    "Introduction": [
+      "Alcohols are compounds containing one or more hydroxyl (-OH) groups attached to sp³ hybridized carbon atoms.",
+      "General formula: $R-OH$"
+    ],
+    "Classification": [
+      "Monohydric, Dihydric, Trihydric alcohols",
+      "Primary (1°), Secondary (2°), and Tertiary (3°) alcohols based on the carbon attached to -OH."
+    ],
+    "Preparation": [
+      "From alkenes: Hydration using acid: $CH_2=CH_2 + H_2O \\xrightarrow{H_2SO_4} CH_3CH_2OH$",
+      "From carbonyl compounds: Reduction of aldehydes/ketones using $LiAlH_4$ or $NaBH_4$",
+      "From halides: $R-X + OH^- \\to R-OH$",
+      "From carboxylic acids: Reduction using $LiAlH_4$: $R-COOH \\to R-CH_2OH$"
+    ],
+    "Chemical Reactions": {
+      "Oxidation": [
+        "Primary alcohols → Aldehydes → Carboxylic acids",
+        "Secondary alcohols → Ketones",
+        "Tertiary alcohols generally resistant to oxidation"
+      ],
+      "Dehydration": [
+        "Alcohols form alkenes with concentrated H2SO4: $CH_3CH_2OH \\xrightarrow{H_2SO_4} CH_2=CH_2 + H_2O$"
+      ],
+      "Substitution": [
+        "Alcohols react with HX to form haloalkanes: $CH_3CH_2OH + HCl \\to CH_3CH_2Cl + H_2O$",
+        "Reaction with PCl5: $CH_3OH + PCl_5 \\to CH_3Cl + POCl_3 + HCl$"
+      ],
+      "Esterification": [
+        "Alcohols react with carboxylic acids to form esters: $CH_3CH_2OH + CH_3COOH \\xrightarrow{H^+} CH_3COOCH_2CH_3 + H_2O$"
+      ]
+    },
+    "Uses": [
+      "Solvents",
+      "Fuel",
+      "Intermediate in organic synthesis",
+      "Beverages (ethanol)"
+    ],
+    "Solvents": "Alcohols like ethanol and methanol are widely used as organic solvents.",
+    "Fuel": "Ethanol is used as a fuel or fuel additive.",
+    "Intermediate in organic synthesis": "Alcohols are intermediates in preparation of aldehydes, ketones, acids, esters, and ethers.",
+    "Beverages (ethanol)": "Ethanol is the active component in alcoholic drinks."
+  },
+
+  "Phenols": {
+    "Introduction": [
+      "Phenols are compounds containing hydroxyl (-OH) group directly bonded to an aromatic ring.",
+      "General formula: $Ar-OH$"
+    ],
+    "Preparation": [
+      "From halobenzenes (Nucleophilic substitution): $C_6H_5Cl + NaOH \\xrightarrow{high temp} C_6H_5OH + NaCl$",
+      "From diazonium salts (Sandmeyer type reaction): $C_6H_5N_2^+Cl^- + H_2O \\to C_6H_5OH + N_2 + HCl$",
+      "From cumene (cumene hydroperoxide method)"
+    ],
+    "Chemical Reactions": {
+      "Acidity": [
+        "Phenols are more acidic than alcohols due to resonance stabilization of phenoxide ion."
+      ],
+      "Electrophilic Substitution": [
+        "Nitration: $C_6H_5OH + HNO_3 \\to 2-nitrophenol + 4-nitrophenol$",
+        "Halogenation: $C_6H_5OH + Br_2 \\to 2,4,6-tribromophenol$",
+        "Sulfonation: $C_6H_5OH + SO_3 \\xrightarrow{conc. H_2SO_4} C_6H_4SO_3H$"
+      ],
+      "Reactions with Metals": [
+        "Phenols react with Na, forming sodium phenoxide: $2C_6H_5OH + 2Na \\to 2C_6H_5ONa + H_2$"
+      ]
+    },
+    "Uses": [
+      "Antiseptic",
+      "Precursor for dyes",
+      "Synthesis of plastics (phenolic resins)",
+      "Pharmaceuticals"
+    ],
+    "Antiseptic": "Phenols are used as antiseptics due to their disinfectant properties.",
+    "Precursor for dyes": "Phenols are intermediates in dye synthesis.",
+    "Synthesis of plastics (phenolic resins)": "Used in Bakelite and other phenolic resins.",
+    "Pharmaceuticals": "Used in preparation of drugs like aspirin."
+  },
+
+  "Ethers": {
+    "Introduction": [
+      "Ethers are compounds containing an oxygen atom bonded to two alkyl or aryl groups: $R-O-R'$",
+      "General formula: $R-O-R'$"
+    ],
+    "Preparation": [
+      "From alcohols (Dehydration): $2CH_3CH_2OH \\xrightarrow{H_2SO_4} CH_3CH_2OCH_2CH_3 + H_2O$",
+      "Williamson ether synthesis: $R-X + R'ONa \\to R-O-R' + NaX$"
+    ],
+    "Chemical Reactions": {
+      "Cleavage": [
+        "Ethers react with HI/HBr to form alcohols and alkyl halides: $CH_3CH_2OCH_3 + HI \\to CH_3CH_2I + CH_3OH$"
+      ],
+      "Combustion": [
+        "Ethers burn to give CO2 and H2O."
+      ]
+    },
+    "Uses": [
+      "Solvents",
+      "Anesthetics",
+      "Industrial intermediates"
+    ],
+    "Solvents": "Ethers like diethyl ether are used as solvents for Grignard reactions and organic extractions.",
+    "Anesthetics": "Some ethers (like diethyl ether) are used as anesthetics.",
+    "Industrial intermediates": "Ethers are intermediates in chemical synthesis of perfumes, pharmaceuticals, and plastics."
+  }
+};
+
+// STRUCTURED DATA FOR TREE
+const DATA = {
+  "Alcohols, Phenols & Ethers": {
+    "Alcohols": {
+      "Preparation":["From alkenes","From carbonyl compounds","From halides","From carboxylic acids"],
+      "Chemical Reactions":["Oxidation","Dehydration","Substitution","Esterification"],
+      "Uses":["Solvents","Fuel","Intermediate in organic synthesis","Beverages (ethanol)"]
+    },
+    "Phenols": {
+      "Preparation":["From halobenzenes","From diazonium salts","From cumene"],
+      "Chemical Reactions":["Acidity","Electrophilic Substitution","Reactions with Metals"],
+      "Uses":["Antiseptic","Precursor for dyes","Synthesis of plastics (phenolic resins)","Pharmaceuticals"]
+    },
+    "Ethers": {
+      "Preparation":["From alcohols (Dehydration)","Williamson ether synthesis"],
+      "Chemical Reactions":["Cleavage","Combustion"],
+      "Uses":["Solvents","Anesthetics","Industrial intermediates"]
+    }
+  }
+};
+
+
+// TREE & HIERARCHY
+function toHierarchy(data){
+  function convert(obj){
+    if(Array.isArray(obj)) return obj.map(e=>({name:e,type:'point'}));
+    return Object.entries(obj).map(([k,v])=>({name:k,children:convert(v)}));
+  }
+  const rootKey = Object.keys(data)[0]; // dynamically detect main topic
+  return { name: rootKey, children: convert(data[rootKey]) };
+}
+
+
+const svg=d3.select('#mindmap-svg');
+const g=svg.append('g');
+const root=d3.hierarchy(toHierarchy(DATA));
+const tree=d3.tree().nodeSize([180,320]);
+
+// Collapse all except root's immediate children
+root.children.forEach(c=>{if(c.children){c._children=c.children;c.children=null;}});
+
+function update(source){
+  const nodes=tree(root), links=nodes.links(), nodesArr=nodes.descendants();
+  nodesArr.forEach(d=>{d.y=d.depth*(d.depth<=1?240:240+d.data.name.length*3);});
+
+  // Links
+  const link=g.selectAll('.link').data(links,d=>d.target.data.name);
+  link.enter().append('path').attr('class','link').attr('fill','none')
+      .attr('stroke','#cbd5e1').attr('stroke-width',2.5)
+    .merge(link).transition().duration(400)
+      .attr('d',d=>`M${d.source.x},${d.source.y}C${d.source.x},${(d.source.y+d.target.y)/2} ${d.target.x},${(d.source.y+d.target.y)/2} ${d.target.x},${d.target.y}`);
+  link.exit().remove();
+
+  // Nodes
+  const node=g.selectAll('.node').data(nodesArr,d=>d.data.name);
+  const nodeEnter=node.enter().append('g').attr('class','node')
+    .attr('transform',d=>`translate(${source.x0||0},${source.y0||0})`);
+
+  nodeEnter.append('circle')
+    .attr('r',1e-6)
+    .attr('fill',d=>d._children||d.children?colorDepth(d.depth):'#e2e8f0')
+    .attr('stroke','#0f172a')
+    .attr('stroke-width',2)
+    .on('click',(e,d)=>{
+      e.stopPropagation();
+      // --- TOGGLE IMMEDIATE CHILDREN ONLY ---
+      if(d.children){
+        d._children = d.children; 
+        d.children = null;
+      } else if(d._children){
+        d.children = d._children.map(c=>{
+          // preserve grandchildren collapsed
+          if(c._children) c._children = c._children;
+          if(c.children) c._children = c.children;
+          c.children = null;
+          return c;
+        });
+        d._children = null;
+      }
+      update(d);
+      zoomToNode(d);
+    });
+
+  nodeEnter.each(function(d){
+    const gNode=d3.select(this);
+    const textEl=gNode.append('text').attr('x',0).attr('y',-radius(0)-8).attr('text-anchor','middle').text(d.data.name)
+      .on('click',(e)=>{e.stopPropagation();showInfo(d.data.name);}).call(wrapAbove,200);
+    const bbox=textEl.node().getBBox();
+    gNode.insert('rect','text').attr('class','label-box')
+      .attr('x',bbox.x-8).attr('y',bbox.y-4)
+      .attr('width',bbox.width+16).attr('height',bbox.height+8)
+      .on('click',(e)=>{e.stopPropagation();showInfo(d.data.name);});
+  });
+
+  const nodeMerge=nodeEnter.merge(node);
+  nodeMerge.transition().duration(400).attr('transform',d=>`translate(${d.x},${d.y})`);
+  nodeMerge.select('circle').transition().duration(400).attr('r',d=>radius(d.depth));
+  node.exit().remove();
+  nodesArr.forEach(d=>{d.x0=d.x;d.y0=d.y;});
+}
+
+// Wrap text
+function wrapAbove(text,width){text.each(function(){const textEl=d3.select(this);const words=textEl.text().split(/\s+/).reverse();let word,line=[],lineNumber=0;let y=parseFloat(textEl.attr('y'));let tspan=textEl.text(null).append('tspan').attr('x',0).attr('y',y).attr('text-anchor','middle').attr('dy',0+'em');while(word=words.pop()){line.push(word);tspan.text(line.join(' '));if(tspan.node().getComputedTextLength()>width){line.pop();tspan.text(line.join(' '));line=[word];lineNumber--;tspan=textEl.append('tspan').attr('x',0).attr('y',y).attr('text-anchor','middle').attr('dy',lineNumber*1.2+'em').text(word);}}});}
+
+// Zoom to node + its immediate children
+function zoomToNode(d){
+  const descendants=[d];
+  if(d.children) descendants.push(...d.children);
+  let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+  descendants.forEach(n=>{x0=Math.min(x0,n.x);x1=Math.max(x1,n.x);y0=Math.min(y0,n.y);y1=Math.max(y1,n.y);});
+  const svgRect=svg.node().getBoundingClientRect();
+  const scale=Math.min(svgRect.width/(x1-x0+80),svgRect.height/(y1-y0+80));
+  const tx=svgRect.width/2-(x0+x1)/2*scale;
+  const ty=svgRect.height/2-(y0+y1)/2*scale;
+  svg.transition().duration(600).call(zoom.transform,d3.zoomIdentity.translate(tx,ty).scale(scale));
+}
+
+// Initial render
+update(root);
+
+// Zoom behavior
+const zoom=d3.zoom().scaleExtent([0.3,3]).on('zoom',e=>g.attr('transform',e.transform));
+svg.call(zoom).on('dblclick.zoom',null);
+
+// Initial centering
+setTimeout(()=>{zoomToNode(root);},200);
+
+// Toolbar
+document.getElementById('expandAll').onclick=()=>{root.each(d=>{if(d._children){d.children=d._children;d._children=null;}});update(root);};
+document.getElementById('collapseAll').onclick=()=>{root.each(d=>{if(d.children){d._children=d.children;d.children=null;}});update(root);};
+document.getElementById('centerBtn').onclick=()=>{zoomToNode(root);};
+document.getElementById('resetZoom').onclick=()=>{svg.transition().duration(500).call(zoom.transform,d3.zoomIdentity);};
+
+// Modal
+const modal=document.getElementById('infoModal');
+const title=document.getElementById('modalTitle');
+const desc=document.getElementById('modalDesc');
+document.querySelector('.close').onclick=()=>modal.style.display='none';
+window.onclick=(e)=>{if(e.target===modal) modal.style.display='none';};
+
+function findDescription(obj,key){if(!obj||typeof obj!=='object') return null;if(obj[key]) return obj[key];for(const k in obj){const res=findDescription(obj[k],key);if(res) return res;}return null;}
+
+function showInfo(topic){
+  title.textContent = topic;
+  const data = findDescription(DESCRIPTIONS, topic);
+
+  if(data){
+    let html = '';
+
+    if(Array.isArray(data)){
+      html = data.map(x => `<div style="margin-bottom:6px;">${x}</div>`).join('');
+    } else if(typeof data === 'string'){
+      html = `<div style="margin-bottom:6px;">${data}</div>`;
+    } else {
+      for(const [k,v] of Object.entries(data)){
+        if(Array.isArray(v)){
+          html += `<div style="margin-bottom:10px;"><strong>${k}:</strong><br>${v.map(x => `<div style="margin-left:12px; margin-bottom:4px;">${x}</div>`).join('')}</div>`;
+        } else {
+          html += `<div style="margin-bottom:10px;"><strong>${k}:</strong> ${v}</div>`;
+        }
+      }
+    }
+
+    desc.innerHTML = html;
+  } else {
+    desc.innerHTML = "<div>No description available.</div>";
+  }
+
+  modal.style.display = 'block';
+  if(window.MathJax && window.MathJax.typeset) MathJax.typeset();
+}
+
+function colorDepth(d){return d===0?'#0ea5e9':d===1?'#f97316':d===2?'#34d399':d===3?'#f472b6':'#a78bfa';}
+function radius(d){return d===0?26:d===1?22:d===2?18:d===3?14:10;}
+</script>
+</body>
+</html>
